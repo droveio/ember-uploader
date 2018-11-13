@@ -18,11 +18,12 @@ automatically give you an input field, and will set `files` property when you
 choose a file.
 
 ```js
-import EmberUploader from 'ember-uploader';
+import FileField from 'ember-uploader/components/file-field';
+import Uploader from 'ember-uploader/uploaders/uploader';
 
-export default EmberUploader.FileField.extend({
-  filesDidChange: function(files) {
-    const uploader = EmberUploader.Uploader.create({
+export default FileField.extend({
+  filesDidChange(files) {
+    const uploader = Uploader.create({
       url: this.get('url')
     });
 
@@ -44,7 +45,9 @@ By default, the request will be sent as `POST`. To override that, set `method` w
 creating the object:
 
 ```js
-const uploader = EmberUploader.Uploader.create({
+import Uploader from 'ember-uploader/uploaders/uploader';
+
+const uploader = Uploader.create({
   url: '/upload',
   method: 'PUT'
 });
@@ -53,7 +56,9 @@ const uploader = EmberUploader.Uploader.create({
 #### Change Namespace
 
 ```js
-const uploader = EmberUploader.Uploader.create({
+import Uploader from 'ember-uploader/uploaders/uploader';
+
+const uploader = Uploader.create({
   paramNamespace: 'post'
 });
 
@@ -64,7 +69,9 @@ const uploader = EmberUploader.Uploader.create({
 By default parameter will be `file`
 
 ```js
-const upload = EmberUploader.Uploader.create({
+import Uploader from 'ember-uploader/uploaders/uploader';
+
+const upload = Uploader.create({
   paramName: 'upload'
 });
 
@@ -109,14 +116,15 @@ uploader.upload(file).then(data => {
 
 #### Multiple files
 ```js
-import EmberUploader from 'ember-uploader';
+import FileField from 'ember-uploader/components/file-field';
+import Uploader from 'ember-uploader/uploaders/uploader';
 
-export default EmberUploader.FileField.extend({
+export default FileField.extend({
   multiple: true,
   url: 'http://example.com/upload',
 
-  filesDidChange (files) {
-    const uploader = EmberUploader.Uploader.create({
+  filesDidChange(files) {
+    const uploader = Uploader.create({
       url: this.get('url')
     });
 
@@ -129,15 +137,15 @@ export default EmberUploader.FileField.extend({
 ```
 
 ### Modifying the request
-Ember uploader uses jQuery.ajax under the hood so it accepts the same
+Ember Uploader uses jQuery.ajax under the hood so it accepts the same
 ajax settings via the `ajaxSettings` property which is then merged with any
 settings required by Ember Uploader. Here we modify the headers sent with
-the request.
+the request. Note - S3 Uploader uses `signingAjaxSettings` as the relevant key.
 
 ```js
-import EmberUploader from 'ember-uploader';
+import Uploader from 'ember-uploader/uploaders/uploader';
 
-export default EmberUploader.Uploader.extend({
+export default Uploader.extend({
   ajaxSettings: {
     headers: {
       'X-Application-Name': 'Uploader Test'
@@ -156,14 +164,20 @@ able to make an authenticated request to S3. This step is required to avoid
 saving secret token on your client.
 
 ```js
-import EmberUploader from 'ember-uploader';
+import FileField from 'ember-uploader/components/file-field';
+import S3Uploader from 'ember-uploader/uploaders/s3';
 
-export default EmberUploader.FileField.extend({
+export default FileField.extend({
   signingUrl: '',
 
-  filesDidChange (files) {
-    const uploader = EmberUploader.S3Uploader.create({
-      signingUrl: this.get('signingUrl')
+  filesDidChange(files) {
+    const uploader = S3Uploader.create({
+      signingUrl: this.get('signingUrl'),
+      signingAjaxSettings: {
+        headers: {
+          'X-Application-Name': 'Uploader Test'
+        }
+      }
     });
 
     uploader.on('didUpload', response => {
@@ -191,23 +205,18 @@ In lieu of a formal styleguide, take care to maintain the existing coding
 style. Add unit tests for any new or changed functionality.
 
 Ember Uploader uses [node.js](http://nodejs.org) and
-[Ember CLI](http://www.ember-cli.com/) for builds and tests while using
-[bower](http://bower.io/) for dependency management. You will need to have
+[Ember CLI](https://ember-cli.com/) for builds and tests. You will need to have
 these tools installed if you would like to build Ember Uploader.
 
 ```sh
-$ npm install -g bower
 $ npm install -g ember-cli
 ```
 
-To get started with development simply do a `npm install` inside the cloned
+To get started with development simply do a `yarn install` inside the cloned
 repository to install all dependencies needed for running
-[Ember CLI](http://www.ember-cli.com/). This also executes `bower install` for
-the runtime dependencies. Afterwards you can run `ember build` which builds
-the library.
+[Ember CLI](http://www.ember-cli.com/).
 
-Lint and test your code using: `ember test`. For headless testing you should
-have [PhantomJS](http://phantomjs.org/) installed.
+Lint and test your code using: `ember test`.
 
 ## Thank you
 The Ember team, its contributors and community for being awesome. Also thank
